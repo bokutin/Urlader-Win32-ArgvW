@@ -1,4 +1,5 @@
-W32CROSS=i386-mingw32- # port install i386-mingw32-gcc && port install i386-mingw32-binutils
+# port install i386-mingw32-gcc && port install i386-mingw32-binutils
+W32CROSS=i386-mingw32-
 #CFLAGS=-Os -DUNICODE
 CFLAGS=-Os
 STRIP=strip
