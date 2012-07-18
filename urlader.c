@@ -77,7 +77,32 @@ static void
 systemv (const char *const argv[])
 {
 #ifdef _WIN32
-  _spawnv (P_WAIT, argv [0], argv);
+  //_spawnv (P_WAIT, argv [0], argv);
+
+  LPWSTR *clargw;
+  int clargc;
+
+  clargw = CommandLineToArgvW(GetCommandLineW(), &clargc);
+
+  LPWSTR wargv[ (sizeof(argv)-1) + (clargc-1) ];
+
+  int idx;
+  int ret;
+  int widx = 0;
+
+  for (idx=0; idx<(sizeof(argv)-1); idx++) {
+    wchar_t *warg = (wchar_t *)malloc( sizeof(wchar_t) * (strlen(argv[idx]) + 1) );
+    ret = mbstowcs( warg, argv[idx], strlen(argv[idx])+1 );
+    wargv[widx++] = warg;
+  }
+
+  for (idx=1; idx<clargc; idx++) {
+    wargv[widx++] = clargw[idx];
+  }
+
+  wargv[widx++] = NULL;
+
+  _wspawnv(P_WAIT, wargv[0], wargv);
 #else
   pid_t pid = fork ();
 

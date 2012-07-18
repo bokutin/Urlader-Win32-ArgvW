@@ -1,4 +1,5 @@
-W32CROSS=i686-w64-mingw32-
+W32CROSS=i386-mingw32- # port install i386-mingw32-gcc && port install i386-mingw32-binutils
+#CFLAGS=-Os -DUNICODE
 CFLAGS=-Os
 STRIP=strip
 
@@ -9,7 +10,7 @@ SRC = ..
 
 SOURCES = urlader.c urlib.h urlib.c liblzf/lzfP.h liblzf/lzf_d.c
 SRCSOURCES = $(addprefix $(SRC)/,$(SOURCES))
-BINARIES = windows-x86 linux-x86 linux-amd64 darwin-x86
+BINARIES = windows-x86
 
 all: $(BINARIES)
 

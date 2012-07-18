@@ -51,6 +51,10 @@
 
   static DWORD dword;
 
+  #ifndef SHGFP_TYPE_CURRENT
+    #define SHGFP_TYPE_CURRENT 0
+  #endif
+
   #define u_handle HANDLE
   #define u_invalid_handle 0
   #define u_valid(handle) (!!handle)
