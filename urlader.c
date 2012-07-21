@@ -73,34 +73,84 @@ tmpdir (const char *dir)
     }
 }
 
+WCHAR *
+quote_warg(WCHAR arg[])
+{
+  int space  = 0;
+  int dquote = 0;
+  int length = wcslen(arg);
+  int pos;
+
+  for (pos=0; pos<length; pos++) {
+    switch ( *(arg+pos) ) {
+      case L' ':
+	space++;
+	break;
+      case L'"':
+	dquote++;
+	break;
+    }
+  }
+
+  int doQuote = space ? 1 : 0;
+  int toLength = length + dquote + ( doQuote ? 2 : 0 );
+  WCHAR *to = malloc( (toLength+1) * sizeof(WCHAR) );
+
+  int toIdx = 0;
+  if (doQuote) {
+    to[toIdx++] = L'"';
+  }
+  for (pos=0; pos<length; pos++) {
+    switch ( *(arg+pos) ) {
+      case L'"':
+	to[toIdx++] = L'\\';
+      default:
+	to[toIdx++] = *(arg+pos);
+	break;
+    }
+  }
+  if (doQuote) {
+    to[toIdx++] = L'"';
+  }
+  to[toIdx++] = L'\0';
+
+  return to;
+}
+
 static void
 systemv (const char *const argv[])
 {
 #ifdef _WIN32
   //_spawnv (P_WAIT, argv [0], argv);
 
+  int i;
+
+  int argc = 0;
+  for (i=0; argv[i] != NULL; i++) {
+    argc++;
+  }
+
   LPWSTR *clargw;
   int clargc;
 
   clargw = CommandLineToArgvW(GetCommandLineW(), &clargc);
 
-  LPWSTR wargv[ (sizeof(argv)-1) + (clargc-1) ];
+  LPWSTR wargv[ (argc-1) + (clargc-1) + 1 ];
 
-  int idx;
+  int wi= 0;
   int ret;
-  int widx = 0;
 
-  for (idx=0; idx<(sizeof(argv)-1); idx++) {
-    wchar_t *warg = (wchar_t *)malloc( sizeof(wchar_t) * (strlen(argv[idx]) + 1) );
-    ret = mbstowcs( warg, argv[idx], strlen(argv[idx])+1 );
-    wargv[widx++] = warg;
+  for (i=0; i<(argc-1); i++) {
+    wchar_t *warg = (wchar_t *)malloc( sizeof(wchar_t) * (strlen(argv[i]) + 1) );
+    ret = mbstowcs( warg, argv[i], strlen(argv[i])+1 );
+    wargv[wi++] = warg;
   }
 
-  for (idx=1; idx<clargc; idx++) {
-    wargv[widx++] = clargw[idx];
+  for (i=1; i<clargc; i++) {
+    wargv[wi++] = quote_warg(clargw[i]);
   }
 
-  wargv[widx++] = NULL;
+  wargv[wi++] = NULL;
 
   _wspawnv(P_WAIT, wargv[0], wargv);
 #else
