@@ -11,18 +11,26 @@ SRC = ..
 
 SOURCES = urlader.c urlib.h urlib.c liblzf/lzfP.h liblzf/lzf_d.c
 SRCSOURCES = $(addprefix $(SRC)/,$(SOURCES))
-BINARIES = windows-x86
+BINARIES = windows-x86-argvw-gui windows-x86-argvw-cui
 
 all: $(BINARIES)
 
 clean:
 	rm -f $(BINARIES)
 
-windows-x86: $(SRCSOURCES) $(SRC)/urlader.ico
+windows-x86-argvw-gui: $(SRCSOURCES) $(SRC)/urlader.ico
 	echo 'MAINICON ICON "$(SRC)/urlader.ico"' >icon.rc
 	$(W32CROSS)windres icon.rc icon.o
 	rm icon.rc
 	$(W32CROSS)gcc $(CFLAGS) -mwin32 -mwindows -o $@ $< icon.o -lshell32 -lshlwapi
+	rm icon.o
+	$(W32CROSS)$(STRIP) $@
+
+windows-x86-argvw-cui: $(SRCSOURCES) $(SRC)/urlader.ico
+	echo 'MAINICON ICON "$(SRC)/urlader.ico"' >icon.rc
+	$(W32CROSS)windres icon.rc icon.o
+	rm icon.rc
+	$(W32CROSS)gcc $(CFLAGS) -mwin32 -o $@ $< icon.o -lshell32 -lshlwapi
 	rm icon.o
 	$(W32CROSS)$(STRIP) $@
 
